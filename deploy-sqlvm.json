@@ -69,7 +69,7 @@
     },
     "newBaseUri": {
       "type": "string",
-      "defaultValue": "https://github.com/shantha05/test/blob/main/"
+      "defaultValue": "https://raw.githubusercontent.com/shantha05/test/main/"
     }  
   },
   "variables": {

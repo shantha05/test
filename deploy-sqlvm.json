@@ -76,7 +76,7 @@
     "SQLScriptFileName": "deploy-sqlvm-wrapper.ps1",
     "ScriptFolder": "[concat(parameters('baseUri'),parameters('resourceFolder'),'scripts')]",
     "SQLScriptUrl1": "[concat(variables('ScriptFolder'), '/', variables('SQLScriptFileName'))]",
-    "SQLScriptUrl2": "[concat(variables('newBaseUri'), '/deploy-sqlvm-wrapped.ps1')]",
+    "SQLScriptUrl2": "[concat(parameters('newBaseUri'), '/deploy-sqlvm-wrapped.ps1')]",
     "SQLScriptDownload": "[concat('powershell -ExecutionPolicy Unrestricted \"[Net.ServicePointManager]::SecurityProtocol = ''Tls12''; Invoke-WebRequest -uri ', variables('SQLScriptUrl1') ,' -OutFile ', variables('SQLScriptFileName'), ' \"')]",
     "SQLScriptParameters": "[concat(' -user ', parameters('adminUsername'), '@', parameters('domainToJoin'), ' -password ', parameters('adminPassword'), ' -dbsource \"', parameters('SQLDownloadUrl'), '\" -scripturl \"', variables('SQLScriptUrl2'), '\"')]",
     "SQLImagePublisher": "MicrosoftSQLServer",

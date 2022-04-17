@@ -1,0 +1,218 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "skuSizeVM": {
+      "defaultValue": "D2s_v3",
+      "type": "string",
+      "metadata": {
+        "description": "Size of Virtual Machines to use"
+      },
+      "allowedValues": [
+        "D2s_v3",
+        "D2s_v5",
+        "DC2s_v3"
+      ]
+    },
+    "SQLVMName": {
+      "type": "string",
+      "defaultValue": "SQLVM1",
+      "minLength": 1
+    },
+    "AvailabilityZone": {
+      "type": "string",
+      "metadata": {
+        "description": "Availability zone to deploy to"
+      }
+    },
+    "DataSubnetId": {
+      "type": "string",
+      "metadata": {
+        "description": "Subnet Id of the data tier"
+      }
+    },
+    "adminUsername": {
+      "type": "string",
+      "defaultValue": "demouser",
+      "metadata": {
+        "description": "The name of the administrator account of the new VMs"
+      }
+    },
+    "adminPassword": {
+      "type": "securestring",
+      "defaultValue": "Demo!pass123",
+      "metadata": {
+        "description": "The password for the administrator account of the new VMs"
+      }
+    },
+    "domainToJoin": {
+      "type": "string",
+      "defaultValue": "contoso.com",
+      "metadata": {
+        "description": "Domain FQDN for VMs to join"
+      }
+    },
+    "SQLDownloadUrl": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "(Optional) URL for SQL database backup to be restored into the database"
+      }
+    },
+    "resourceFolder": {
+      "type": "string",
+      "defaultValue": "master/Hands-on%20lab/Resources/"
+    },
+    "baseUri": {
+      "type": "string",
+      "defaultValue": "https://raw.githubusercontent.com/microsoft/MCW-Building-a-resilient-IaaS-architecture/"
+    },
+    "newBaseUri": {
+      "type": "string",
+      "defaultValue": "https://github.com/shantha05/test/blob/main/"
+    }  
+  },
+  "variables": {
+    "SQLScriptFileName": "deploy-sqlvm-wrapper.ps1",
+    "ScriptFolder": "[concat(parameters('baseUri'),parameters('resourceFolder'),'scripts')]",
+    "SQLScriptUrl1": "[concat(variables('ScriptFolder'), '/', variables('SQLScriptFileName'))]",
+    "SQLScriptUrl2": "[concat(variables('newBaseUri'), '/deploy-sqlvm-wrapped.ps1')]",
+    "SQLScriptDownload": "[concat('powershell -ExecutionPolicy Unrestricted \"[Net.ServicePointManager]::SecurityProtocol = ''Tls12''; Invoke-WebRequest -uri ', variables('SQLScriptUrl1') ,' -OutFile ', variables('SQLScriptFileName'), ' \"')]",
+    "SQLScriptParameters": "[concat(' -user ', parameters('adminUsername'), '@', parameters('domainToJoin'), ' -password ', parameters('adminPassword'), ' -dbsource \"', parameters('SQLDownloadUrl'), '\" -scripturl \"', variables('SQLScriptUrl2'), '\"')]",
+    "SQLImagePublisher": "MicrosoftSQLServer",
+    "SQLImageOffer": "SQL2017-WS2016",
+    "SQLSKU": "SQLDEV",
+    "SQLVMSize": "[concat('Standard_',parameters('skuSizeVM'))]",
+    "SQLVMOSDiskName": "[concat(parameters('SQLVMName'), 'OSDisk')]",
+    "SQLVMDataDiskName": "[concat(parameters('SQLVMName'), 'DataDisk1')]",
+    "SQLNicName": "[concat(parameters('SQLVMName'), 'NIC')]",
+    "DiskType": "Premium_LRS",
+    "domainOUPath": "",
+    "domainJoinOptions": 3
+  },
+  "resources": [
+    {
+      "name": "[variables('SQLNicName')]",
+      "type": "Microsoft.Network/networkInterfaces",
+      "location": "[resourceGroup().location]",
+      "apiVersion": "2016-03-30",
+      "properties": {
+        "ipConfigurations": [
+          {
+            "name": "ipconfig1",
+            "properties": {
+              "privateIPAllocationMethod": "Dynamic",
+              "subnet": {
+                "id": "[parameters('DataSubnetId')]"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "[parameters('SQLVMName')]",
+      "type": "Microsoft.Compute/virtualMachines",
+      "location": "[resourceGroup().location]",
+      "apiVersion": "2019-03-01",
+      "dependsOn": [
+        "[variables('SQLNicName')]"
+      ],
+      "zones": [
+        "[parameters('AvailabilityZone')]"
+      ],
+      "properties": {
+        "hardwareProfile": {
+          "vmSize": "[variables('SQLVMSize')]"
+        },
+        "osProfile": {
+          "computerName": "[parameters('SQLVMName')]",
+          "adminUsername": "[parameters('adminUsername')]",
+          "adminPassword": "[parameters('adminPassword')]"
+        },
+        "storageProfile": {
+          "imageReference": {
+            "publisher": "[variables('SQLImagePublisher')]",
+            "offer": "[variables('SQLImageOffer')]",
+            "sku": "[variables('SQLSKU')]",
+            "version": "latest"
+          },
+          "osDisk": {
+            "name": "[variables('SQLVMOSDiskName')]",
+            "caching": "ReadWrite",
+            "createOption": "FromImage",
+            "managedDisk": {
+              "storageAccountType": "[variables('DiskType')]"
+            }
+          },
+          "dataDisks": [
+            {
+              "name": "[variables('SQLVMDataDiskName')]",
+              "diskSizeGB": 128,
+              "lun": 0,
+              "createOption": "Empty",
+              "managedDisk": {
+                "storageAccountType": "[variables('DiskType')]"
+              }
+            }
+          ]
+        },
+        "networkProfile": {
+          "networkInterfaces": [
+            {
+              "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('SQLNicName'))]"
+            }
+          ]
+        }
+      },
+      "resources": [
+        {
+          "name": "InstallDB",
+          "type": "extensions",
+          "location": "[resourceGroup().location]",
+          "apiVersion": "2019-03-01",
+          "dependsOn": [
+            "[parameters('SQLVMName')]",
+            "[resourceId('Microsoft.Compute/virtualMachines/extensions', parameters('SQLVMName'), 'JoinDomain')]"
+          ],
+          "properties": {
+            "publisher": "Microsoft.Compute",
+            "type": "CustomScriptExtension",
+            "typeHandlerVersion": "1.10",
+            "autoUpgradeMinorVersion": true,
+            "settings": {
+              "commandToExecute": "[concat(variables('SQLScriptDownload'),'; powershell -ExecutionPolicy Unrestricted -File ', variables('SQLScriptFileName'), ' ', variables('SQLScriptParameters'))]"
+            }
+          }
+        },
+        {
+          "name": "JoinDomain",
+          "type": "extensions",
+          "location": "[resourceGroup().location]",
+          "apiVersion": "2015-06-15",
+          "dependsOn": [
+            "[parameters('SQLVMName')]"
+          ],
+          "properties": {
+            "publisher": "Microsoft.Compute",
+            "type": "JsonADDomainExtension",
+            "typeHandlerVersion": "1.3",
+            "autoUpgradeMinorVersion": true,
+            "settings": {
+              "Name": "[parameters('domainToJoin')]",
+              "OUPath": "[variables('domainOUPath')]",
+              "User": "[concat(parameters('domainToJoin'), '\\', parameters('adminUsername'))]",
+              "Restart": "true",
+              "Options": "[variables('domainJoinOptions')]"
+            },
+            "protectedSettings": {
+              "Password": "[parameters('adminPassword')]"
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "outputs": {
+  }
+}

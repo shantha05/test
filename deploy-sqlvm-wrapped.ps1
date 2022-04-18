@@ -38,7 +38,7 @@ $backups = "F:\Backup"
 Write-Output "Set up data, backup and log directories in SQL, plus mixed-mode auth"
 Import-Module "sqlps" -DisableNameChecking
 [System.Reflection.Assembly]::LoadWithPartialName("Microsoft.SqlServer.Smo")
-$sqlesq = new-object ('Microsoft.SqlServer.Management.Smo.Server') 10.0.2.4
+$sqlesq = new-object ('Microsoft.SqlServer.Management.Smo.Server') .
 $sqlesq.Settings.LoginMode = [Microsoft.SqlServer.Management.Smo.ServerLoginMode]::Mixed
 $sqlesq.Settings.DefaultFile = $data
 $sqlesq.Settings.DefaultLog = $logs

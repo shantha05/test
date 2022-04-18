@@ -39,7 +39,7 @@ Write-Output "Set up data, backup and log directories in SQL, plus mixed-mode au
 Import-Module "sqlps" -DisableNameChecking
 [System.Reflection.Assembly]::LoadWithPartialName("Microsoft.SqlServer.SqlWmiManagement") | Out-Null
 [System.Reflection.Assembly]::LoadWithPartialName('Microsoft.SqlServer.SMO') | out-null
-$sqlesq = new-object ('Microsoft.SqlServer.Management.Smo.Server') 'SQLVM1'
+$sqlesq = New-Object -TypeName Microsoft.SqlServer.Management.Smo.Server -ArgumentList 'SQLVM1'
 [string]$nm = $sqlesq.Name
 [string]$mode = $sqlesq.Settings.LoginMode
 write-output "Instance Name: $nm"

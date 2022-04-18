@@ -39,7 +39,7 @@ Write-Output "Set up data, backup and log directories in SQL, plus mixed-mode au
 Import-Module "sqlps" -DisableNameChecking
 [System.Reflection.Assembly]::LoadWithPartialName("Microsoft.SqlServer.SqlWmiManagement") | Out-Null
 [System.Reflection.Assembly]::LoadWithPartialName('Microsoft.SqlServer.SMO') | out-null
-$sqlesq = New-Object -TypeName Microsoft.SqlServer.Management.Smo.Server -ArgumentList 'SQLVM1'
+$sqlesq = New-Object -TypeName Microsoft.SqlServer.Management.Smo.Server -ArgumentList Localhost
 [string]$nm = $sqlesq.Name
 [string]$mode = $sqlesq.Settings.LoginMode
 write-output "Instance Name: $nm"
@@ -56,13 +56,13 @@ Restart-Service -Name "MSSQLSERVER" -Force
 
 # Re-enable the sa account and set a new password to enable login
 Write-Output "Re-enable 'sa' account, and set password to $password"
-Invoke-Sqlcmd -ServerInstance SQLVM1 -Database "master" -Query "ALTER LOGIN sa ENABLE" 
-Invoke-Sqlcmd -ServerInstance SQLVM1 -Database "master" -Query "ALTER LOGIN sa WITH PASSWORD = '$password'"
+Invoke-Sqlcmd -ServerInstance Localhost -Database "master" -Query "ALTER LOGIN sa ENABLE" 
+Invoke-Sqlcmd -ServerInstance Localhost -Database "master" -Query "ALTER LOGIN sa WITH PASSWORD = '$password'"
 
 #Add local administrators group as sysadmin
 Write-Output "Add local admins as sysadmin"
-Invoke-Sqlcmd -ServerInstance SQLVM1 -Database "master" -Query "CREATE LOGIN [BUILTIN\Administrators] FROM WINDOWS"
-Invoke-Sqlcmd -ServerInstance SQLVM1 -Database "master" -Query "ALTER SERVER ROLE sysadmin ADD MEMBER [BUILTIN\Administrators]"
+Invoke-Sqlcmd -ServerInstance Localhost -Database "master" -Query "CREATE LOGIN [BUILTIN\Administrators] FROM WINDOWS"
+Invoke-Sqlcmd -ServerInstance Localhost -Database "master" -Query "ALTER SERVER ROLE sysadmin ADD MEMBER [BUILTIN\Administrators]"
 
 # Build Firewall Rules for SQL & AOG
 Write-Output "Firewall rules"

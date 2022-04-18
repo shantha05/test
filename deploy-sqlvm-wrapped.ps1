@@ -44,38 +44,6 @@ $sqlesq = New-Object -TypeName Microsoft.SqlServer.Management.Smo.Server -Argume
 [string]$mode = $sqlesq.Settings.LoginMode
 write-output "Instance Name: $nm"
 write-output "Login Mode: $mode"
-
-[string] $AuthenticationMode = "Mixed"
-if($currentMode -eq $AuthenticationMode)
-       {
-              "Current login mode is already set to $AuthenticationMode. Skipping the step" | Write-Verbose
-       }
-       else
-       {
-              switch($AuthenticationMode)
-              {
-                     "Integrated"
-                     {
-                           $sqlesq.Settings.LoginMode = [Microsoft.SqlServer.Management.SMO.ServerLoginMode]::Integrated
-                     }
-                     "Mixed"      
-                     {
-                           $sqlesq.Settings.LoginMode = [Microsoft.SqlServer.Management.SMO.ServerLoginMode]::Mixed
-                     }
-                     "Normal"
-                     {
-                           $sqlesq.Settings.LoginMode = [Microsoft.SqlServer.Management.SMO.ServerLoginMode]::Normal
-                     }
-                     "Unknown"
-                     {
-                           $sqlesq.Settings.LoginMode = [Microsoft.SqlServer.Management.SMO.ServerLoginMode]::Unknown
-                     }
-                     default
-                     {
-                           "Unable to set a login mode with name $AuthenticationMode. Skipping this step" | Write-Error
-                     }
-              }
-       }
 $sqlesq.Settings.LoginMode = [Microsoft.SqlServer.Management.Smo.ServerLoginMode]::Mixed
 $sqlesq.Settings.DefaultFile = $data
 $sqlesq.Settings.DefaultLog = $logs
@@ -130,6 +98,7 @@ if (($null -ne $dbsource) -and ($dbsource -ne "")) {
     # Get the Contoso Insurance database backup 
     $dbdestination = "D:\ContosoInsurance.bak"
     Write-Output "Download $dbsource to $dbdestination"
+    [Net.ServicePointManager]::SecurityProtocol = 'Tls12'
     Invoke-WebRequest $dbsource -OutFile $dbdestination
 
     # Restore the database from the backup

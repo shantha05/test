@@ -40,7 +40,7 @@ Import-Module "sqlps" -DisableNameChecking
 Add-Type -AssemblyName "Microsoft.SqlServer.Smo"
 $sqlesq = new-object ('Microsoft.SqlServer.Management.Smo.Server') 'SQLVM1'
 [string]$nm = $sqlesq.Name
-[string]$mode = $sqlesq.Settings.LoginMode
+[string]$mode = $sqlesq.Settings.State
 write-output "Instance Name: $nm"
 write-output "Login Mode: $mode"
 $sqlesq.Settings.LoginMode = [Microsoft.SqlServer.Management.Smo.ServerLoginMode]::Mixed

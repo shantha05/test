@@ -5,6 +5,7 @@ Start-Transcript "C:\deploy-sql-wrapper-log.txt"
 # Get the second script
 $script = "D:\script.ps1"
 Write-Output "Download $scripturl to $deployScript"
+[System.Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType]::Tls12;
 Invoke-WebRequest $scripturl -OutFile $script
 
 Write-Output "Create credential"

@@ -98,7 +98,7 @@ if (($null -ne $dbsource) -and ($dbsource -ne "")) {
     # Get the Contoso Insurance database backup 
     $dbdestination = "D:\ContosoInsurance.bak"
     Write-Output "Download $dbsource to $dbdestination"
-    [Net.ServicePointManager]::SecurityProtocol = 'Tls12'
+    [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType]::Tls12;
     Invoke-WebRequest $dbsource -OutFile $dbdestination
 
     # Restore the database from the backup

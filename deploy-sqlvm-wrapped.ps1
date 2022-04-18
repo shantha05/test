@@ -78,6 +78,7 @@ if($currentMode -eq $AuthenticationMode)
                            "Unable to set a login mode with name $AuthenticationMode. Skipping this step" | Write-Error
                      }
               }
+       }
 $sqlesq.Settings.LoginMode = [Microsoft.SqlServer.Management.Smo.ServerLoginMode]::Mixed
 $sqlesq.Settings.DefaultFile = $data
 $sqlesq.Settings.DefaultLog = $logs

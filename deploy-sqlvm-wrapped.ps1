@@ -37,11 +37,8 @@ $backups = "F:\Backup"
 # Setup the data, backup and log directories as well as mixed mode authentication
 Write-Output "Set up data, backup and log directories in SQL, plus mixed-mode auth"
 Import-Module "sqlps" -DisableNameChecking
-Initialize-Assembly -Name 'Microsoft.SqlServer.SMO'
-if(-not(Test-AssemblyLoaded -Name 'Microsoft.SqlServer.SMO'))
-{
-      throw "Unable to find the SQL server management objects assembly"
-}
+[System.Reflection.Assembly]::LoadWithPartialName("Microsoft.SqlServer.SqlWmiManagement") | Out-Null
+[System.Reflection.Assembly]::LoadWithPartialName('Microsoft.SqlServer.SMO') | out-null
 $sqlesq = new-object ('Microsoft.SqlServer.Management.Smo.Server') 'SQLVM1'
 [string]$nm = $sqlesq.Name
 [string]$mode = $sqlesq.Settings.LoginMode

@@ -9,7 +9,7 @@ Invoke-WebRequest $scripturl -OutFile $script
 
 Write-Output "Create credential"
 $securePwd =  ConvertTo-SecureString "$password" -AsPlainText -Force
-$credential = New-Object System.Management.Automation.PSCredential("$env:COMPUTERNAME\$user", $securePwd)
+$credential = New-Object System.Management.Automation.PSCredential("$env:COMPUTERNAME\demouser@contoso.com", $securePwd)
 
 Write-Output "Enable remoting and invoke"
 Enable-PSRemoting -force

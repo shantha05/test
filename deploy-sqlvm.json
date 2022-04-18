@@ -182,7 +182,7 @@
             "autoUpgradeMinorVersion": true,
             "settings": {
               "fileUris": "[array(variables('SQLScriptUrl1'))]",
-              "commandToExecute": "['powershell -ExecutionPolicy Unrestricted -File ', variables('SQLScriptFileName'), ' ', variables('SQLScriptParameters'))]"
+              "commandToExecute": "['powershell -ExecutionPolicy Unrestricted -File ', variables('SQLScriptFileName'), ' ', variables('SQLScriptParameters')]"
             }
           }
         },

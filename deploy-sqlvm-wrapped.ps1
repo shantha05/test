@@ -37,12 +37,47 @@ $backups = "F:\Backup"
 # Setup the data, backup and log directories as well as mixed mode authentication
 Write-Output "Set up data, backup and log directories in SQL, plus mixed-mode auth"
 Import-Module "sqlps" -DisableNameChecking
-Add-Type -AssemblyName "Microsoft.SqlServer.Smo"
+Initialize-Assembly -Name 'Microsoft.SqlServer.SMO'
+if(-not(Test-AssemblyLoaded -Name 'Microsoft.SqlServer.SMO'))
+{
+      throw "Unable to find the SQL server management objects assembly"
+}
 $sqlesq = new-object ('Microsoft.SqlServer.Management.Smo.Server') 'SQLVM1'
 [string]$nm = $sqlesq.Name
 [string]$mode = $sqlesq.Settings.LoginMode
 write-output "Instance Name: $nm"
 write-output "Login Mode: $mode"
+
+[string] $AuthenticationMode = "Mixed"
+if($currentMode -eq $AuthenticationMode)
+       {
+              "Current login mode is already set to $AuthenticationMode. Skipping the step" | Write-Verbose
+       }
+       else
+       {
+              switch($AuthenticationMode)
+              {
+                     "Integrated"
+                     {
+                           $sqlServer.Settings.LoginMode = [Microsoft.SqlServer.Management.SMO.ServerLoginMode]::Integrated
+                     }
+                     "Mixed"      
+                     {
+                           $sqlServer.Settings.LoginMode = [Microsoft.SqlServer.Management.SMO.ServerLoginMode]::Mixed
+                     }
+                     "Normal"
+                     {
+                           $sqlServer.Settings.LoginMode = [Microsoft.SqlServer.Management.SMO.ServerLoginMode]::Normal
+                     }
+                     "Unknown"
+                     {
+                           $sqlServer.Settings.LoginMode = [Microsoft.SqlServer.Management.SMO.ServerLoginMode]::Unknown
+                     }
+                     default
+                     {
+                           "Unable to set a login mode with name $AuthenticationMode. Skipping this step" | Write-Error
+                     }
+              }
 $sqlesq.Settings.LoginMode = [Microsoft.SqlServer.Management.Smo.ServerLoginMode]::Mixed
 $sqlesq.Settings.DefaultFile = $data
 $sqlesq.Settings.DefaultLog = $logs

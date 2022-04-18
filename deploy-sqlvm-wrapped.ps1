@@ -56,19 +56,19 @@ if($currentMode -eq $AuthenticationMode)
               {
                      "Integrated"
                      {
-                           $sqlServer.Settings.LoginMode = [Microsoft.SqlServer.Management.SMO.ServerLoginMode]::Integrated
+                           $sqlesq.Settings.LoginMode = [Microsoft.SqlServer.Management.SMO.ServerLoginMode]::Integrated
                      }
                      "Mixed"      
                      {
-                           $sqlServer.Settings.LoginMode = [Microsoft.SqlServer.Management.SMO.ServerLoginMode]::Mixed
+                           $sqlesq.Settings.LoginMode = [Microsoft.SqlServer.Management.SMO.ServerLoginMode]::Mixed
                      }
                      "Normal"
                      {
-                           $sqlServer.Settings.LoginMode = [Microsoft.SqlServer.Management.SMO.ServerLoginMode]::Normal
+                           $sqlesq.Settings.LoginMode = [Microsoft.SqlServer.Management.SMO.ServerLoginMode]::Normal
                      }
                      "Unknown"
                      {
-                           $sqlServer.Settings.LoginMode = [Microsoft.SqlServer.Management.SMO.ServerLoginMode]::Unknown
+                           $sqlesq.Settings.LoginMode = [Microsoft.SqlServer.Management.SMO.ServerLoginMode]::Unknown
                      }
                      default
                      {

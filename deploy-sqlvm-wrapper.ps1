@@ -10,12 +10,12 @@ Invoke-WebRequest $scripturl -OutFile $script
 
 Write-Output "Create credential"
 $securePwd =  ConvertTo-SecureString "$password" -AsPlainText -Force
-$credential = New-Object System.Management.Automation.PSCredential("$env:COMPUTERNAME\demouser@contoso.com", $securePwd)
+$credential = New-Object System.Management.Automation.PSCredential("SQLVM1\demouser@contoso.com", $securePwd)
 
 Write-Output "Enable remoting and invoke"
 Enable-PSRemoting -force
 Set-NetFirewallRule -Name "WINRM-HTTP-In-TCP-PUBLIC" -RemoteAddress Any
-Invoke-Command -FilePath $script -Credential $credential -ComputerName $env:COMPUTERNAME -ArgumentList $password, $dbsource
+Invoke-Command -FilePath $script -Credential $credential -ComputerName SQLVM1.contoso.com -ArgumentList $password, $dbsource
 Disable-PSRemoting -Force
 
 Stop-Transcript
